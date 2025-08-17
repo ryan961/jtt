@@ -14,10 +14,16 @@ const (
 	MsgT808_0x0001 MsgID = 0x0001
 	// MsgT808_0x0002 终端心跳
 	MsgT808_0x0002 MsgID = 0x0002
+	// MsgT808_0x0003 终端注销
+	MsgT808_0x0003 MsgID = 0x0003
 	// MsgT808_0x0004 查询服务器时间请求
 	MsgT808_0x0004 MsgID = 0x0004
-	// MsgT808_0x8004 查询服务器时间应答
-	MsgT808_0x8004 MsgID = 0x8004
+	// MsgT808_0x0005 终端补传分包请求(消息体格式同 0x8003)
+	MsgT808_0x0005 MsgID = 0x0005
+	// MsgT808_0x0100 终端注册
+	MsgT808_0x0100 MsgID = 0x0100
+	// MsgT808_0x0102 终端鉴权
+	MsgT808_0x0102 MsgID = 0x0102
 	// MsgT808_0x0104 查询终端参数应答
 	MsgT808_0x0104 MsgID = 0x0104
 	// MsgT808_0x0200 汇报位置
@@ -27,6 +33,12 @@ const (
 
 	// MsgT808_0x8001 平台通用应答
 	MsgT808_0x8001 MsgID = 0x8001
+	// MsgT808_0x8003 补传分包请求
+	MsgT808_0x8003 MsgID = 0x8003
+	// MsgT808_0x8004 查询服务器时间应答
+	MsgT808_0x8004 MsgID = 0x8004
+	// MsgT808_0x8100 终端注册应答
+	MsgT808_0x8100 MsgID = 0x8100
 	// MsgT808_0x8104 查询终端参数
 	MsgT808_0x8104 MsgID = 0x8104
 	// MsgT808_0x8300 文本信息下发
