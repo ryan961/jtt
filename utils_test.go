@@ -2,8 +2,8 @@ package jtt
 
 import (
 	"fmt"
-	"time"
 	"testing"
+	"time"
 
 	"github.com/shopspring/decimal"
 )
@@ -553,9 +553,6 @@ func Test_Unescape_EmptyBody(t *testing.T) {
 
 // -------- BCD time tests --------
 func Test_ToBCDTime_Zero(t *testing.T) {
-	if b := ToBCDTime(time.Time{}); len(b) != 6 || string(b) == "" {
-		// length is primary check; content equals StringToBCD("000000000000",6)
-	}
 	if b := ToBCDTime(time.Unix(0, 0)); string(b) != string(StringToBCD("000000000000", 6)) {
 		t.Fatalf("ToBCDTime zero mismatch: % X", b)
 	}
