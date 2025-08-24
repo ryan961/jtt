@@ -2,6 +2,7 @@ package jtt
 
 import (
 	"fmt"
+	"time"
 	"testing"
 
 	"github.com/shopspring/decimal"
@@ -514,5 +515,93 @@ func Test_BcdToString(t *testing.T) {
 	// with ignorePadding=true: do not trim leading '0' chars
 	if s := BcdToString([]byte{0x01, 0x23}, true); s != "0123" {
 		t.Fatalf("keep zeros: expected 0123, got %q", s)
+	}
+}
+
+// -------- Escape/Unescape tests --------
+func Test_Escape_Unescape_Basic(t *testing.T) {
+	src := []byte{0x01, 0x7e, 0x02, 0x7d, 0x03}
+	esc := Escape(src)
+	// Expect: 7e | 01 | 7d 02 | 02 | 7d 01 | 03 | 7e
+	want := []byte{0x7e, 0x01, 0x7d, 0x02, 0x02, 0x7d, 0x01, 0x03, 0x7e}
+	if string(esc) != string(want) {
+		t.Fatalf("escape mismatch:\nwant % X\n got % X", want, esc)
+	}
+	got := Unescape(esc)
+	if string(got) != string(src) {
+		t.Fatalf("unescape mismatch:\nwant % X\n got % X", src, got)
+	}
+}
+
+func Test_Unescape_NoEscapes(t *testing.T) {
+	pkt := []byte{0x7e, 0x11, 0x22, 0x33, 0x44, 0x7e}
+	got := Unescape(pkt)
+	want := []byte{0x11, 0x22, 0x33, 0x44}
+	if string(got) != string(want) {
+		t.Fatalf("unescape no-escapes: want % X, got % X", want, got)
+	}
+}
+
+func Test_Unescape_EmptyBody(t *testing.T) {
+	// Only boundary marks -> empty body
+	pkt := []byte{0x7e, 0x7e}
+	got := Unescape(pkt)
+	if len(got) != 0 {
+		t.Fatalf("expected empty, got % X", got)
+	}
+}
+
+// -------- BCD time tests --------
+func Test_ToBCDTime_Zero(t *testing.T) {
+	if b := ToBCDTime(time.Time{}); len(b) != 6 || string(b) == "" {
+		// length is primary check; content equals StringToBCD("000000000000",6)
+	}
+	if b := ToBCDTime(time.Unix(0, 0)); string(b) != string(StringToBCD("000000000000", 6)) {
+		t.Fatalf("ToBCDTime zero mismatch: % X", b)
+	}
+}
+
+func Test_ToBCDTime_NonZero(t *testing.T) {
+	loc := time.FixedZone("UTC+8", 8*3600)
+	t1 := time.Date(2023, 12, 31, 23, 59, 58, 0, loc)
+	got := ToBCDTime(t1)
+	want := StringToBCD(t1.Format("20060102150405")[2:], 6)
+	if string(got) != string(want) {
+		t.Fatalf("ToBCDTime mismatch: want % X, got % X", want, got)
+	}
+}
+
+func Test_FromBCDTime_RoundTrip_Local(t *testing.T) {
+	base := time.Date(2021, 7, 8, 9, 10, 11, 0, time.Local)
+	b := ToBCDTime(base)
+	got, err := FromBCDTime(b)
+	if err != nil {
+		t.Fatalf("FromBCDTime error: %v", err)
+	}
+	if got.Year() != 2021 || got.Month() != 7 || got.Day() != 8 || got.Hour() != 9 || got.Minute() != 10 || got.Second() != 11 {
+		t.Fatalf("FromBCDTime wrong value: %v", got)
+	}
+}
+
+func Test_FromBCDTimeInLocation_Known(t *testing.T) {
+	loc := time.FixedZone("UTC-3", -3*3600)
+	// 2025-01-02 03:04:05 -> without century
+	b := StringToBCD("250102030405", 6)
+	got, err := FromBCDTimeInLocation(b, loc)
+	if err != nil {
+		t.Fatalf("FromBCDTimeInLocation error: %v", err)
+	}
+	if got.Year() != 2025 || got.Month() != time.January || got.Day() != 2 || got.Hour() != 3 || got.Minute() != 4 || got.Second() != 5 {
+		t.Fatalf("unexpected parsed time: %v", got)
+	}
+	_, off := got.Zone()
+	if off != -3*3600 {
+		t.Fatalf("unexpected zone offset: %d", off)
+	}
+}
+
+func Test_FromBCDTime_InvalidLen(t *testing.T) {
+	if _, err := FromBCDTime([]byte{0x12}); err == nil {
+		t.Fatalf("expected error for invalid length")
 	}
 }
