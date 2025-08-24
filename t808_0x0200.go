@@ -199,7 +199,8 @@ func (msg *T808_0x0200) Decode(data []byte) (int, error) {
 //	bit03：经度（0 东经；1 西经）
 //	bit04：运营/停运（0 运营状态；1 停运状态）
 //	bit05：经纬度加密（0 未经保密插件加密；1 已加密）
-//	bit06-bit07：保留
+//	bit06：紧急刹车系统采集的前撞预警
+//	bit07：车道偏离预警
 //	bit08-bit09：载重状态 00 空车；01 半载；10 保留；11 满载
 //	bit10：车辆油路（0 正常；1 断开）
 //	bit11：车辆电路（0 正常；1 断开）
@@ -213,7 +214,8 @@ func (msg *T808_0x0200) Decode(data []byte) (int, error) {
 //	bit19：使用 北斗 卫星定位（0 未使用；1 使用）
 //	bit20：使用 GLONASS 卫星定位（0 未使用；1 使用）
 //	bit21：使用 Galileo 卫星定位（0 未使用；1 使用）
-//	bit22-bit31：保留
+//	bit22：车辆状态（0 停止；1 行驶）
+//	bit23-bit31：保留
 type T808_0x0200_Status uint32
 
 // GetAccState 获取Acc状态
@@ -272,6 +274,18 @@ func (status *T808_0x0200_Status) SetOperatingStopped(b bool) {
 func (status T808_0x0200_Status) CoordEncrypted() bool { return GetBitUint32(uint32(status), 5) }
 func (status *T808_0x0200_Status) SetCoordEncrypted(b bool) {
 	SetBitUint32((*uint32)(status), 5, b)
+}
+
+// ForwardCollisionWarn [bit6] 紧急刹车系统采集的前撞预警
+func (status T808_0x0200_Status) ForwardCollisionWarn() bool { return GetBitUint32(uint32(status), 6) }
+func (status *T808_0x0200_Status) SetForwardCollisionWarn(b bool) {
+	SetBitUint32((*uint32)(status), 6, b)
+}
+
+// LaneDepartureWarn [bit7] 车道偏离预警
+func (status T808_0x0200_Status) LaneDepartureWarn() bool { return GetBitUint32(uint32(status), 7) }
+func (status *T808_0x0200_Status) SetLaneDepartureWarn(b bool) {
+	SetBitUint32((*uint32)(status), 7, b)
 }
 
 // T808_0x0200_Status_LoadStatus 载重状态（占用 bit8-bit9）
@@ -386,6 +400,12 @@ func (status *T808_0x0200_Status) SetUseGalileo(b bool) {
 	SetBitUint32((*uint32)(status), 21, b)
 }
 
+// VehicleRunning [bit22] 车辆状态（0 停止；1 行驶）
+func (status T808_0x0200_Status) VehicleRunning() bool { return GetBitUint32(uint32(status), 22) }
+func (status *T808_0x0200_Status) SetVehicleRunning(b bool) {
+	SetBitUint32((*uint32)(status), 22, b)
+}
+
 // T808_0x0200_Alarm 报警标志位
 // 每一位表示一个报警/预警状态，位为1表示触发。
 // 处理规则：未注明的均为“标志维持至报警条件解除”；注明“收到应答后清零”的在平台应答后清零。
@@ -406,7 +426,9 @@ func (status *T808_0x0200_Status) SetUseGalileo(b bool) {
 //	bit12：道路运输证 IC 卡模块故障
 //	bit13：超速预警
 //	bit14：疲劳驾驶预警
-//	bit15-bit17：保留
+//	bit15：违规行驶报警
+//	bit16：胎压预警
+//	bit17：右转盲区异常报警
 //	bit18：当天累计驾驶超时
 //	bit19：超时停车
 //	bit20：进出区域——收到应答后清零
@@ -486,6 +508,22 @@ func (alarm *T808_0x0200_Alarm) SetOverspeedWarn(b bool) { SetBitUint32((*uint32
 // FatigueWarn [bit14] 疲劳驾驶预警。维持至报警条件解除。
 func (alarm T808_0x0200_Alarm) FatigueWarn() bool      { return GetBitUint32(uint32(alarm), 14) }
 func (alarm *T808_0x0200_Alarm) SetFatigueWarn(b bool) { SetBitUint32((*uint32)(alarm), 14, b) }
+
+// IrregularDriving [bit15] 违规行驶报警。维持至报警条件解除。
+func (alarm T808_0x0200_Alarm) IrregularDriving() bool      { return GetBitUint32(uint32(alarm), 15) }
+func (alarm *T808_0x0200_Alarm) SetIrregularDriving(b bool) { SetBitUint32((*uint32)(alarm), 15, b) }
+
+// TirePressureWarn [bit16] 胎压预警。维持至报警条件解除。
+func (alarm T808_0x0200_Alarm) TirePressureWarn() bool      { return GetBitUint32(uint32(alarm), 16) }
+func (alarm *T808_0x0200_Alarm) SetTirePressureWarn(b bool) { SetBitUint32((*uint32)(alarm), 16, b) }
+
+// RightTurnBlindSpotAbnormal [bit17] 右转盲区异常报警。维持至报警条件解除。
+func (alarm T808_0x0200_Alarm) RightTurnBlindSpotAbnormal() bool {
+	return GetBitUint32(uint32(alarm), 17)
+}
+func (alarm *T808_0x0200_Alarm) SetRightTurnBlindSpotAbnormal(b bool) {
+	SetBitUint32((*uint32)(alarm), 17, b)
+}
 
 // CumulativeDrivingTimeout [bit18] 当天累计驾驶超时。维持至报警条件解除。
 func (alarm T808_0x0200_Alarm) CumulativeDrivingTimeout() bool {

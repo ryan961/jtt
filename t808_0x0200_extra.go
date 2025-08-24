@@ -34,6 +34,10 @@ const (
 	T808_0x0200_Extra_ID_Speed T808_0x0200_Extra_ID = 0x03
 	// T808_0x0200_Extra_ID_AlarmConfirm 报警确认
 	T808_0x0200_Extra_ID_AlarmConfirm T808_0x0200_Extra_ID = 0x04
+	// T808_0x0200_Extra_ID_TirePressure 胎压（30 字节，最多 15 个车轮，每个为 WORD，单位 Pa；多余字节 0xFF 表示无效）
+	T808_0x0200_Extra_ID_TirePressure T808_0x0200_Extra_ID = 0x05
+	// T808_0x0200_Extra_ID_Temperature 车厢温度（WORD，单位摄氏度，范围 -32767~+32767，最高位 1 表示负数）
+	T808_0x0200_Extra_ID_Temperature T808_0x0200_Extra_ID = 0x06
 	// T808_0x0200_Extra_ID_SpeedLimit 超速报警
 	T808_0x0200_Extra_ID_SpeedLimit T808_0x0200_Extra_ID = 0x11
 	// T808_0x0200_Extra_ID_Region 进出区域报警
@@ -109,6 +113,69 @@ func (e *T808_0x0200_Extra) GetAlarmConfirmId() (uint16, error) {
 		return 0, fmt.Errorf("read alarm confirm id: %w", err)
 	}
 	return v, nil
+}
+
+// GetTirePressures 胎压（0x05），长度固定 30 字节，最多 15 个胎压值（WORD，单位 Pa）。0xFFFF 表示无效/无数据。
+func (e *T808_0x0200_Extra) GetTirePressures() ([]uint16, error) {
+	if e.Id != T808_0x0200_Extra_ID_TirePressure {
+		return nil, fmt.Errorf("invalid extra id(%s/%d) for GetTirePressures", e.Id.String(), e.Id)
+	}
+	if len(e.Data) != 30 {
+		return nil, fmt.Errorf("tire pressure extra invalid length: %d", len(e.Data))
+	}
+	r := NewReader(e.Data)
+	res := make([]uint16, 0, 15)
+	for i := 0; i < 15; i++ {
+		v, err := r.ReadUint16()
+		if err != nil {
+			return nil, fmt.Errorf("read tire pressure[%d]: %w", i, err)
+		}
+		if v != 0xFFFF {
+			res = append(res, v)
+		}
+	}
+	return res, nil
+}
+
+// SetTirePressures 设置 0x05 胎压。按从车头到车尾、由左至右的顺序依次写入；最多 15 个，剩余位置填充 0xFFFF。
+func (e *T808_0x0200_Extra) SetTirePressures(pressures []uint16) {
+	e.Id = T808_0x0200_Extra_ID_TirePressure
+	w := NewWriter()
+	n := len(pressures)
+	if n > 15 {
+		n = 15
+	}
+	for i := 0; i < n; i++ {
+		w.WriteUint16(pressures[i])
+	}
+	for i := n; i < 15; i++ {
+		w.WriteUint16(0xFFFF)
+	}
+	e.Data = w.Bytes()
+}
+
+// GetTemperature 车厢温度（0x06），长度 2 字节，单位为摄氏度，取值范围 -32767~+32767，最高位 1 表示负数。
+func (e *T808_0x0200_Extra) GetTemperature() (int16, error) {
+	if e.Id != T808_0x0200_Extra_ID_Temperature {
+		return 0, fmt.Errorf("invalid extra id(%s/%d) for GetTemperature", e.Id.String(), e.Id)
+	}
+	if len(e.Data) != 2 {
+		return 0, fmt.Errorf("temperature extra invalid length: %d", len(e.Data))
+	}
+	r := NewReader(e.Data)
+	v, err := r.ReadUint16()
+	if err != nil {
+		return 0, fmt.Errorf("read temperature: %w", err)
+	}
+	return int16(v), nil
+}
+
+// SetTemperature 设置 0x06 车厢温度（单位：摄氏度）。
+func (e *T808_0x0200_Extra) SetTemperature(temp int16) {
+	e.Id = T808_0x0200_Extra_ID_Temperature
+	w := NewWriter()
+	w.WriteUint16(uint16(temp))
+	e.Data = w.Bytes()
 }
 
 // OverspeedLocationType 位置类型
@@ -361,8 +428,6 @@ func (e *T808_0x0200_Extra) GetSatelliteCount() (byte, error) {
 	}
 	return v, nil
 }
-
-// -------------------- Setters --------------------
 
 // SetMileage 设置 0x01 里程（DWORD）
 func (e *T808_0x0200_Extra) SetMileage(mileage uint32) {
