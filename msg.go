@@ -20,6 +20,12 @@ const (
 	MsgT808_0x0004 MsgID = 0x0004
 	// MsgT808_0x0005 终端补传分包请求(消息体格式同 0x8003)
 	MsgT808_0x0005 MsgID = 0x0005
+	// MsgT808_0x0301 事件报告
+	MsgT808_0x0301 MsgID = 0x0301
+	// MsgT808_0x0302 提问应答
+	MsgT808_0x0302 MsgID = 0x0302
+	// MsgT808_0x0303 信息点播/取消
+	MsgT808_0x0303 MsgID = 0x0303
 	// MsgT808_0x0100 终端注册
 	MsgT808_0x0100 MsgID = 0x0100
 	// MsgT808_0x0102 终端鉴权
@@ -36,6 +42,8 @@ const (
 	MsgT808_0x0201 MsgID = 0x0201
 	// MsgT808_0x0704 定位数据批量上传
 	MsgT808_0x0704 MsgID = 0x0704
+	// MsgT808_0x0500 车辆控制应答
+	MsgT808_0x0500 MsgID = 0x0500
 
 	// MsgT808_0x8001 平台通用应答
 	MsgT808_0x8001 MsgID = 0x8001
@@ -63,8 +71,22 @@ const (
 	MsgT808_0x8202 MsgID = 0x8202
 	// MsgT808_0x8203 人工确认报警
 	MsgT808_0x8203 MsgID = 0x8203
+	// MsgT808_0x8204 链路检测
+	MsgT808_0x8204 MsgID = 0x8204
 	// MsgT808_0x8300 文本信息下发
 	MsgT808_0x8300 MsgID = 0x8300
+	// MsgT808_0x8301 事件设置
+	MsgT808_0x8301 MsgID = 0x8301
+	// MsgT808_0x8302 提问下发
+	MsgT808_0x8302 MsgID = 0x8302
+	// MsgT808_0x8303 信息点播菜单设置
+	MsgT808_0x8303 MsgID = 0x8303
+	// MsgT808_0x8304 信息服务
+	MsgT808_0x8304 MsgID = 0x8304
+	// MsgT808_0x8400 电话回拨
+	MsgT808_0x8400 MsgID = 0x8400
+	// MsgT808_0x8401 设置电话本
+	MsgT808_0x8401 MsgID = 0x8401
 	// MsgT808_0x8600 设置圆形区域
 	MsgT808_0x8600 MsgID = 0x8600
 	// MsgT808_0x8601 删除圆形区域
@@ -81,6 +103,8 @@ const (
 	MsgT808_0x8606 MsgID = 0x8606
 	// MsgT808_0x8607 删除路线
 	MsgT808_0x8607 MsgID = 0x8607
+	// MsgT808_0x8500 车辆控制
+	MsgT808_0x8500 MsgID = 0x8500
 
 	// 0x0F00 ~ 0x0FFF 终端上行信息保留（自定义）
 
