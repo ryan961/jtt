@@ -8,7 +8,7 @@ type T808_0x0704 struct {
 	// 0：正常位置批量汇报， 1：盲区补报
 	Type byte
 	// 位置汇报数据项
-	Items []T808_0x0200
+	Locations []T808_0x0200
 }
 
 func (entity *T808_0x0704) MsgID() MsgID {
@@ -19,16 +19,16 @@ func (entity *T808_0x0704) Encode() ([]byte, error) {
 	writer := NewWriter()
 
 	// 写入数据项个数
-	writer.WriteUint16(uint16(len(entity.Items)))
+	writer.WriteUint16(uint16(len(entity.Locations)))
 
 	// 写入位置数据类型
 	writer.WriteByte(entity.Type)
 
 	// 写入位置汇报数据项
-	for _, position := range entity.Items {
+	for _, position := range entity.Locations {
 		data, err := position.Encode()
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("encode position: %w", err)
 		}
 		writer.WriteUint16(uint16(len(data)))
 		writer.Write(data)
@@ -45,34 +45,34 @@ func (entity *T808_0x0704) Decode(data []byte) (int, error) {
 	// 读取数据项个数
 	count, err := reader.ReadUint16()
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("read count: %w", err)
 	}
 
 	// 写入位置数据类型
 	entity.Type, err = reader.ReadByte()
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("read type: %w", err)
 	}
 
 	// 写入位置汇报数据项
-	entity.Items = make([]T808_0x0200, 0, count)
+	entity.Locations = make([]T808_0x0200, 0, count)
 	for i := 0; i < int(count); i++ {
 		size, err := reader.ReadUint16()
 		if err != nil {
-			return 0, err
+			return 0, fmt.Errorf("read size: %w", err)
 		}
 
 		buf, err := reader.Read(int(size))
 		if err != nil {
-			return 0, err
+			return 0, fmt.Errorf("read buf: %w", err)
 		}
 
 		var position T808_0x0200
 		_, err = position.Decode(buf)
 		if err != nil {
-			return 0, err
+			return 0, fmt.Errorf("decode position: %w", err)
 		}
-		entity.Items = append(entity.Items, position)
+		entity.Locations = append(entity.Locations, position)
 	}
 	return len(data) - reader.Len(), nil
 }
