@@ -391,3 +391,31 @@ func GB18030Length(s string) (int, error) {
 	// 返回编码后字节切片的长度和 nil 错误
 	return len(encodedBytes), nil
 }
+
+// trimRightZeros 去除右侧的 0x00
+func trimRightZeros(b []byte) []byte {
+	for i := 0; i < len(b); i++ {
+		if b[i] == 0x00 {
+			return b[:i]
+		}
+	}
+	return b
+}
+
+// trimRightSpaces 去除右侧的 0x20
+func trimRightSpaces(b []byte) []byte {
+	i := len(b) - 1
+	for i >= 0 && b[i] == 0x20 {
+		i--
+	}
+	return b[:i+1]
+}
+
+// trimLeftZeros 去除左侧的 0x00
+func trimLeftZeros(b []byte) []byte {
+	i := 0
+	for i < len(b) && b[i] == 0x00 {
+		i++
+	}
+	return b[i:]
+}

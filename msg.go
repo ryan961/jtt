@@ -42,6 +42,12 @@ const (
 	MsgT808_0x0201 MsgID = 0x0201
 	// MsgT808_0x0608 查询区域或线路数据应答
 	MsgT808_0x0608 MsgID = 0x0608
+	// MsgT808_0x0700 行驶记录数据上传
+	MsgT808_0x0700 MsgID = 0x0700
+	// MsgT808_0x0701 电子运单上报
+	MsgT808_0x0701 MsgID = 0x0701
+	// MsgT808_0x0702 驾驶员身份信息采集上报
+	MsgT808_0x0702 MsgID = 0x0702
 	// MsgT808_0x0704 定位数据批量上传
 	MsgT808_0x0704 MsgID = 0x0704
 	// MsgT808_0x0500 车辆控制应答
@@ -107,6 +113,12 @@ const (
 	MsgT808_0x8607 MsgID = 0x8607
 	// MsgT808_0x8608 查询区域或线路数据
 	MsgT808_0x8608 MsgID = 0x8608
+	// MsgT808_0x8700 行驶记录数据采集命令
+	MsgT808_0x8700 MsgID = 0x8700
+	// MsgT808_0x8701 行驶记录参数下传命令
+	MsgT808_0x8701 MsgID = 0x8701
+	// MsgT808_0x8702 上报驾驶员身份信息请求
+	MsgT808_0x8702 MsgID = 0x8702
 	// MsgT808_0x8500 车辆控制
 	MsgT808_0x8500 MsgID = 0x8500
 
