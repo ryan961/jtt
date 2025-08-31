@@ -60,6 +60,12 @@ const (
 	MsgT808_0x0802 MsgID = 0x0802
 	// MsgT808_0x0805 摄像头立即拍摄命令应答
 	MsgT808_0x0805 MsgID = 0x0805
+	// MsgT808_0x0900 数据上行透传
+	MsgT808_0x0900 MsgID = 0x0900
+	// MsgT808_0x0901 数据压缩上报
+	MsgT808_0x0901 MsgID = 0x0901
+	// MsgT808_0x0A00 终端RSA公钥
+	MsgT808_0x0A00 MsgID = 0x0A00
 	// MsgT808_0x0500 车辆控制应答
 	MsgT808_0x0500 MsgID = 0x0500
 
@@ -143,6 +149,10 @@ const (
 	MsgT808_0x8804 MsgID = 0x8804
 	// MsgT808_0x8805 单条存储多媒体数据检索上传命令
 	MsgT808_0x8805 MsgID = 0x8805
+	// MsgT808_0x8900 数据下行透传
+	MsgT808_0x8900 MsgID = 0x8900
+	// MsgT808_0x8A00 平台RSA公钥
+	MsgT808_0x8A00 MsgID = 0x8A00
 
 	// 0x0F00 ~ 0x0FFF 终端上行信息保留（自定义）
 
