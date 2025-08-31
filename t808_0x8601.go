@@ -1,5 +1,7 @@
 package jtt
 
+import "fmt"
+
 // T808_0x8601 删除圆形区域
 type T808_0x8601 struct {
 	AreaCount byte     // 区域数,0：删除所有区域,不超过 125 个
@@ -40,7 +42,7 @@ func (entity *T808_0x8601) Decode(data []byte) (int, error) {
 	var err error
 	entity.AreaCount, err = reader.ReadByte()
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("read area count: %w", err)
 	}
 
 	// 读取区域ID列表
@@ -54,7 +56,7 @@ func (entity *T808_0x8601) Decode(data []byte) (int, error) {
 	for i := 0; i < int(entity.AreaCount); i++ {
 		areaID, err := reader.ReadUint32()
 		if err != nil {
-			return 0, err
+			return 0, fmt.Errorf("read area id: %w", err)
 		}
 		entity.AreaIDs[i] = areaID
 	}

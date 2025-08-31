@@ -1,24 +1,9 @@
 package jtt
 
 import (
+	"fmt"
 	"time"
 )
-
-// T808_0x8602_RectangleArea 矩形区域项
-type T808_0x8602_RectangleArea struct {
-	AreaID         uint32        // 区域ID
-	AreaAttribute  AreaAttribute // 区域属性
-	LeftTopLat     uint32        // 左上点纬度(单位：1/10^6 度)
-	LeftTopLng     uint32        // 左上点经度(单位：1/10^6 度)
-	RightBottomLat uint32        // 右下点纬度(单位：1/10^6 度)
-	RightBottomLng uint32        // 右下点经度(单位：1/10^6 度)
-	StartTime      time.Time     // 起始时间，若区域属性0位为0则没有该字段
-	EndTime        time.Time     // 结束时间，若区域属性0位为0则没有该字段
-	MaxSpeed       uint16        // 最高速度(单位：公里/小时)，若区域属性1位为0则没有该字段
-	SpeedDuration  byte          // 超速持续时间(单位：秒)，若区域属性1位为0则没有该字段
-	NightMaxSpeed  uint16        // 夜间最高速度(单位：公里/小时)，若区域属性1位为0则没有该字段（2019版本）
-	AreaName       string        // 区域名称（2019版本）
-}
 
 // T808_0x8602 设置矩形区域
 // 2013版本和2019版本通用（2019版本新增夜间最高速度和区域名称）
@@ -43,6 +28,22 @@ func (entity *T808_0x8602) GetProtocolVersion() VersionType {
 // MsgID 获取消息ID
 func (entity *T808_0x8602) MsgID() MsgID {
 	return MsgT808_0x8602
+}
+
+// T808_0x8602_RectangleArea 矩形区域项
+type T808_0x8602_RectangleArea struct {
+	AreaID         uint32        // 区域ID
+	AreaAttribute  AreaAttribute // 区域属性
+	LeftTopLat     uint32        // 左上点纬度(单位：1/10^6 度)
+	LeftTopLng     uint32        // 左上点经度(单位：1/10^6 度)
+	RightBottomLat uint32        // 右下点纬度(单位：1/10^6 度)
+	RightBottomLng uint32        // 右下点经度(单位：1/10^6 度)
+	StartTime      time.Time     // 起始时间，若区域属性0位为0则没有该字段
+	EndTime        time.Time     // 结束时间，若区域属性0位为0则没有该字段
+	MaxSpeed       uint16        // 最高速度(单位：公里/小时)，若区域属性1位为0则没有该字段
+	SpeedDuration  byte          // 超速持续时间(单位：秒)，若区域属性1位为0则没有该字段
+	NightMaxSpeed  uint16        // 夜间最高速度(单位：公里/小时)，若区域属性1位为0则没有该字段（2019版本）
+	AreaName       string        // 区域名称（2019版本）
 }
 
 // Encode 编码消息
@@ -97,14 +98,14 @@ func (entity *T808_0x8602) Encode() ([]byte, error) {
 			// 写入名称长度
 			length, err := GB18030Length(area.AreaName)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("get GB18030 length: %w", err)
 			}
 			writer.WriteWord(uint16(length))
 
 			// 写入名称
 			err = writer.WriteString(area.AreaName)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("write area name: %w", err)
 			}
 		}
 	}
@@ -120,13 +121,13 @@ func (entity *T808_0x8602) Decode(data []byte) (int, error) {
 	// 读取区域设置属性
 	entity.AreaSettingTag, err = reader.ReadByte()
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("read area setting tag: %w", err)
 	}
 
 	// 读取区域总数
 	entity.AreaCount, err = reader.ReadByte()
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("read area count: %w", err)
 	}
 
 	// 读取矩形区域项
@@ -135,42 +136,42 @@ func (entity *T808_0x8602) Decode(data []byte) (int, error) {
 		// 读取区域ID
 		areaID, err := reader.ReadUint32()
 		if err != nil {
-			return 0, err
+			return 0, fmt.Errorf("read area id: %w", err)
 		}
 		entity.RectangleAreas[i].AreaID = areaID
 
 		// 读取区域属性
 		areaAttr, err := reader.ReadUint16()
 		if err != nil {
-			return 0, err
+			return 0, fmt.Errorf("read area attribute: %w", err)
 		}
 		entity.RectangleAreas[i].AreaAttribute = AreaAttribute(areaAttr)
 
 		// 读取左上点纬度
 		leftTopLat, err := reader.ReadUint32()
 		if err != nil {
-			return 0, err
+			return 0, fmt.Errorf("read left top lat: %w", err)
 		}
 		entity.RectangleAreas[i].LeftTopLat = leftTopLat
 
 		// 读取左上点经度
 		leftTopLng, err := reader.ReadUint32()
 		if err != nil {
-			return 0, err
+			return 0, fmt.Errorf("read left top lng: %w", err)
 		}
 		entity.RectangleAreas[i].LeftTopLng = leftTopLng
 
 		// 读取右下点纬度
 		rightBottomLat, err := reader.ReadUint32()
 		if err != nil {
-			return 0, err
+			return 0, fmt.Errorf("read right bottom lat: %w", err)
 		}
 		entity.RectangleAreas[i].RightBottomLat = rightBottomLat
 
 		// 读取右下点经度
 		rightBottomLng, err := reader.ReadUint32()
 		if err != nil {
-			return 0, err
+			return 0, fmt.Errorf("read right bottom lng: %w", err)
 		}
 		entity.RectangleAreas[i].RightBottomLng = rightBottomLng
 
@@ -178,13 +179,13 @@ func (entity *T808_0x8602) Decode(data []byte) (int, error) {
 		if entity.RectangleAreas[i].AreaAttribute.GetTimeRange() {
 			startTime, err := reader.ReadBcdTime()
 			if err != nil {
-				return 0, err
+				return 0, fmt.Errorf("read start time: %w", err)
 			}
 			entity.RectangleAreas[i].StartTime = startTime
 
 			endTime, err := reader.ReadBcdTime()
 			if err != nil {
-				return 0, err
+				return 0, fmt.Errorf("read end time: %w", err)
 			}
 			entity.RectangleAreas[i].EndTime = endTime
 		}
@@ -193,13 +194,13 @@ func (entity *T808_0x8602) Decode(data []byte) (int, error) {
 		if entity.RectangleAreas[i].AreaAttribute.GetSpeedLimit() {
 			maxSpeed, err := reader.ReadUint16()
 			if err != nil {
-				return 0, err
+				return 0, fmt.Errorf("read max speed: %w", err)
 			}
 			entity.RectangleAreas[i].MaxSpeed = maxSpeed
 
 			speedDuration, err := reader.ReadByte()
 			if err != nil {
-				return 0, err
+				return 0, fmt.Errorf("read speed duration: %w", err)
 			}
 			entity.RectangleAreas[i].SpeedDuration = speedDuration
 
@@ -207,7 +208,7 @@ func (entity *T808_0x8602) Decode(data []byte) (int, error) {
 			if entity.protocolVersion == Version2019 {
 				nightMaxSpeed, err := reader.ReadUint16()
 				if err != nil {
-					return 0, err
+					return 0, fmt.Errorf("read night max speed: %w", err)
 				}
 				entity.RectangleAreas[i].NightMaxSpeed = nightMaxSpeed
 			}
@@ -217,12 +218,12 @@ func (entity *T808_0x8602) Decode(data []byte) (int, error) {
 		if entity.protocolVersion == Version2019 {
 			length, err := reader.ReadWord()
 			if err != nil {
-				return 0, err
+				return 0, fmt.Errorf("read area name length: %w", err)
 			}
 			if length > 0 {
 				areaName, err := reader.ReadString(int(length))
 				if err != nil {
-					return 0, err
+					return 0, fmt.Errorf("read area name: %w", err)
 				}
 				entity.RectangleAreas[i].AreaName = areaName
 			}

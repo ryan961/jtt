@@ -1,8 +1,34 @@
 package jtt
 
 import (
+	"fmt"
 	"time"
 )
+
+// T808_0x8600 设置圆形区域
+// 2013版本和2019版本通用（2019版本新增夜间最高速度和区域名称）
+type T808_0x8600 struct {
+	AreaCount      byte                     // 区域总数
+	AreaSettingTag byte                     // 区域设置属性：0-更新区域；1-追加区域；2-修改区域
+	CircleAreas    []T808_0x8600_CircleArea // 圆形区域项
+
+	protocolVersion VersionType // 协议版本
+}
+
+// SetProtocolVersion 设置协议版本
+func (entity *T808_0x8600) SetProtocolVersion(protocolVersion VersionType) {
+	entity.protocolVersion = protocolVersion
+}
+
+// GetProtocolVersion 获取协议版本
+func (entity *T808_0x8600) GetProtocolVersion() VersionType {
+	return entity.protocolVersion
+}
+
+// MsgID 获取消息ID
+func (entity *T808_0x8600) MsgID() MsgID {
+	return MsgT808_0x8600
+}
 
 // AreaAttribute 区域属性定义
 // 0-15 位
@@ -159,31 +185,6 @@ type T808_0x8600_CircleArea struct {
 	AreaName      string        // 区域名称（2019版本）
 }
 
-// T808_0x8600 设置圆形区域
-// 2013版本和2019版本通用（2019版本新增夜间最高速度和区域名称）
-type T808_0x8600 struct {
-	AreaCount      byte                     // 区域总数
-	AreaSettingTag byte                     // 区域设置属性：0-更新区域；1-追加区域；2-修改区域
-	CircleAreas    []T808_0x8600_CircleArea // 圆形区域项
-
-	protocolVersion VersionType // 协议版本
-}
-
-// SetProtocolVersion 设置协议版本
-func (entity *T808_0x8600) SetProtocolVersion(protocolVersion VersionType) {
-	entity.protocolVersion = protocolVersion
-}
-
-// GetProtocolVersion 获取协议版本
-func (entity *T808_0x8600) GetProtocolVersion() VersionType {
-	return entity.protocolVersion
-}
-
-// MsgID 获取消息ID
-func (entity *T808_0x8600) MsgID() MsgID {
-	return MsgT808_0x8600
-}
-
 // Encode 编码消息
 func (entity *T808_0x8600) Encode() ([]byte, error) {
 	writer := NewWriter()
@@ -235,14 +236,14 @@ func (entity *T808_0x8600) Encode() ([]byte, error) {
 			// 写入名称长度
 			length, err := GB18030Length(area.AreaName)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("write area name length: %w", err)
 			}
 			writer.WriteWord(uint16(length))
 
 			// 写入名称
 			err = writer.WriteString(area.AreaName)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("write area name: %w", err)
 			}
 		}
 	}
@@ -258,13 +259,13 @@ func (entity *T808_0x8600) Decode(data []byte) (int, error) {
 	// 读取区域设置属性
 	entity.AreaSettingTag, err = reader.ReadByte()
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("read area setting tag: %w", err)
 	}
 
 	// 读取区域总数
 	entity.AreaCount, err = reader.ReadByte()
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("read area count: %w", err)
 	}
 
 	// 读取圆形区域项
@@ -273,35 +274,35 @@ func (entity *T808_0x8600) Decode(data []byte) (int, error) {
 		// 读取区域ID
 		areaID, err := reader.ReadUint32()
 		if err != nil {
-			return 0, err
+			return 0, fmt.Errorf("read area id: %w", err)
 		}
 		entity.CircleAreas[i].AreaID = areaID
 
 		// 读取区域属性
 		areaAttr, err := reader.ReadUint16()
 		if err != nil {
-			return 0, err
+			return 0, fmt.Errorf("read area attribute: %w", err)
 		}
 		entity.CircleAreas[i].AreaAttribute = AreaAttribute(areaAttr)
 
 		// 读取中心点纬度
 		centerLat, err := reader.ReadUint32()
 		if err != nil {
-			return 0, err
+			return 0, fmt.Errorf("read center lat: %w", err)
 		}
 		entity.CircleAreas[i].CenterLat = centerLat
 
 		// 读取中心点经度
 		centerLng, err := reader.ReadUint32()
 		if err != nil {
-			return 0, err
+			return 0, fmt.Errorf("read center lng: %w", err)
 		}
 		entity.CircleAreas[i].CenterLng = centerLng
 
 		// 读取半径
 		radius, err := reader.ReadUint32()
 		if err != nil {
-			return 0, err
+			return 0, fmt.Errorf("read radius: %w", err)
 		}
 		entity.CircleAreas[i].Radius = radius
 
@@ -309,13 +310,13 @@ func (entity *T808_0x8600) Decode(data []byte) (int, error) {
 		if entity.CircleAreas[i].AreaAttribute.GetTimeRange() {
 			startTime, err := reader.ReadBcdTime()
 			if err != nil {
-				return 0, err
+				return 0, fmt.Errorf("read start time: %w", err)
 			}
 			entity.CircleAreas[i].StartTime = startTime
 
 			endTime, err := reader.ReadBcdTime()
 			if err != nil {
-				return 0, err
+				return 0, fmt.Errorf("read end time: %w", err)
 			}
 			entity.CircleAreas[i].EndTime = endTime
 		}
@@ -324,13 +325,13 @@ func (entity *T808_0x8600) Decode(data []byte) (int, error) {
 		if entity.CircleAreas[i].AreaAttribute.GetSpeedLimit() {
 			maxSpeed, err := reader.ReadUint16()
 			if err != nil {
-				return 0, err
+				return 0, fmt.Errorf("read max speed: %w", err)
 			}
 			entity.CircleAreas[i].MaxSpeed = maxSpeed
 
 			speedDuration, err := reader.ReadByte()
 			if err != nil {
-				return 0, err
+				return 0, fmt.Errorf("read speed duration: %w", err)
 			}
 			entity.CircleAreas[i].SpeedDuration = speedDuration
 
@@ -338,7 +339,7 @@ func (entity *T808_0x8600) Decode(data []byte) (int, error) {
 			if entity.protocolVersion == Version2019 {
 				nightMaxSpeed, err := reader.ReadUint16()
 				if err != nil {
-					return 0, err
+					return 0, fmt.Errorf("read night max speed: %w", err)
 				}
 				entity.CircleAreas[i].NightMaxSpeed = nightMaxSpeed
 			}
@@ -348,12 +349,12 @@ func (entity *T808_0x8600) Decode(data []byte) (int, error) {
 		if entity.protocolVersion == Version2019 {
 			areaNameLength, err := reader.ReadWord()
 			if err != nil {
-				return 0, err
+				return 0, fmt.Errorf("read area name length: %w", err)
 			}
 			if areaNameLength > 0 {
 				areaName, err := reader.ReadString(int(areaNameLength))
 				if err != nil {
-					return 0, err
+					return 0, fmt.Errorf("read area name: %w", err)
 				}
 				entity.CircleAreas[i].AreaName = areaName
 			}

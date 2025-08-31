@@ -40,6 +40,8 @@ const (
 	MsgT808_0x0200 MsgID = 0x0200
 	// MsgT808_0x0201 位置信息查询应答
 	MsgT808_0x0201 MsgID = 0x0201
+	// MsgT808_0x0608 查询区域或线路数据应答
+	MsgT808_0x0608 MsgID = 0x0608
 	// MsgT808_0x0704 定位数据批量上传
 	MsgT808_0x0704 MsgID = 0x0704
 	// MsgT808_0x0500 车辆控制应答
@@ -103,6 +105,8 @@ const (
 	MsgT808_0x8606 MsgID = 0x8606
 	// MsgT808_0x8607 删除路线
 	MsgT808_0x8607 MsgID = 0x8607
+	// MsgT808_0x8608 查询区域或线路数据
+	MsgT808_0x8608 MsgID = 0x8608
 	// MsgT808_0x8500 车辆控制
 	MsgT808_0x8500 MsgID = 0x8500
 

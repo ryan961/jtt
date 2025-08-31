@@ -1,8 +1,38 @@
 package jtt
 
 import (
+	"fmt"
 	"time"
 )
+
+// T808_0x8606 设置路线
+// 2013版本和2019版本通用（2019版本新增夜间最高速度和区域名称）
+type T808_0x8606 struct {
+	RouteID        uint32                   // 路线ID
+	RouteAttribute RouteAttribute           // 路线属性
+	StartTime      time.Time                // 起始时间，若路线属性0位为0则没有该字段
+	EndTime        time.Time                // 结束时间，若路线属性0位为0则没有该字段
+	PointCount     uint16                   // 拐点数量
+	RoutePoints    []T808_0x8606_RoutePoint // 拐点列表
+	RouteName      string                   // 路线名称（2019版本）
+
+	protocolVersion VersionType // 协议版本
+}
+
+// SetProtocolVersion 设置协议版本
+func (entity *T808_0x8606) SetProtocolVersion(protocolVersion VersionType) {
+	entity.protocolVersion = protocolVersion
+}
+
+// GetProtocolVersion 获取协议版本
+func (entity *T808_0x8606) GetProtocolVersion() VersionType {
+	return entity.protocolVersion
+}
+
+// MsgID 获取消息ID
+func (entity *T808_0x8606) MsgID() MsgID {
+	return MsgT808_0x8606
+}
 
 // RouteAttribute 路线属性定义
 // 0-15 位
@@ -143,35 +173,6 @@ type T808_0x8606_RoutePoint struct {
 	NightMaxSpeed          uint16                // 路段夜间最高速度(单位：公里/小时)，若路段属性1位为0则没有该字段（2019版本）
 }
 
-// T808_0x8606 设置路线
-// 2013版本和2019版本通用（2019版本新增夜间最高速度和区域名称）
-type T808_0x8606 struct {
-	RouteID        uint32                   // 路线ID
-	RouteAttribute RouteAttribute           // 路线属性
-	StartTime      time.Time                // 起始时间，若路线属性0位为0则没有该字段
-	EndTime        time.Time                // 结束时间，若路线属性0位为0则没有该字段
-	PointCount     uint16                   // 拐点数量
-	RoutePoints    []T808_0x8606_RoutePoint // 拐点列表
-	RouteName      string                   // 路线名称（2019版本）
-
-	protocolVersion VersionType // 协议版本
-}
-
-// SetProtocolVersion 设置协议版本
-func (entity *T808_0x8606) SetProtocolVersion(protocolVersion VersionType) {
-	entity.protocolVersion = protocolVersion
-}
-
-// GetProtocolVersion 获取协议版本
-func (entity *T808_0x8606) GetProtocolVersion() VersionType {
-	return entity.protocolVersion
-}
-
-// MsgID 获取消息ID
-func (entity *T808_0x8606) MsgID() MsgID {
-	return MsgT808_0x8606
-}
-
 // Encode 编码消息
 func (entity *T808_0x8606) Encode() ([]byte, error) {
 	writer := NewWriter()
@@ -233,7 +234,7 @@ func (entity *T808_0x8606) Encode() ([]byte, error) {
 	if entity.protocolVersion == Version2019 {
 		length, err := GB18030Length(entity.RouteName)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("get route name length: %w", err)
 		}
 		// 写入名称长度
 		writer.WriteWord(uint16(length))
@@ -241,7 +242,7 @@ func (entity *T808_0x8606) Encode() ([]byte, error) {
 		// 写入名称
 		err = writer.WriteString(entity.RouteName)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("write route name: %w", err)
 		}
 	}
 
@@ -256,13 +257,13 @@ func (entity *T808_0x8606) Decode(data []byte) (int, error) {
 	var err error
 	entity.RouteID, err = reader.ReadUint32()
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("read route id: %w", err)
 	}
 
 	// 读取路线属性
 	routeAttr, err := reader.ReadUint16()
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("read route attribute: %w", err)
 	}
 	entity.RouteAttribute = RouteAttribute(routeAttr)
 
@@ -270,19 +271,19 @@ func (entity *T808_0x8606) Decode(data []byte) (int, error) {
 	if entity.RouteAttribute.GetTimeRange() {
 		entity.StartTime, err = reader.ReadBcdTime()
 		if err != nil {
-			return 0, err
+			return 0, fmt.Errorf("read start time: %w", err)
 		}
 
 		entity.EndTime, err = reader.ReadBcdTime()
 		if err != nil {
-			return 0, err
+			return 0, fmt.Errorf("read end time: %w", err)
 		}
 	}
 
 	// 读取拐点数量
 	entity.PointCount, err = reader.ReadUint16()
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("read point count: %w", err)
 	}
 
 	// 读取拐点列表
@@ -291,42 +292,42 @@ func (entity *T808_0x8606) Decode(data []byte) (int, error) {
 		// 读取拐点ID
 		pointID, err := reader.ReadUint32()
 		if err != nil {
-			return 0, err
+			return 0, fmt.Errorf("read point id: %w", err)
 		}
 		entity.RoutePoints[i].PointID = pointID
 
 		// 读取路段ID
 		segmentID, err := reader.ReadUint32()
 		if err != nil {
-			return 0, err
+			return 0, fmt.Errorf("read segment id: %w", err)
 		}
 		entity.RoutePoints[i].SegmentID = segmentID
 
 		// 读取拐点纬度
 		pointLat, err := reader.ReadUint32()
 		if err != nil {
-			return 0, err
+			return 0, fmt.Errorf("read point lat: %w", err)
 		}
 		entity.RoutePoints[i].PointLat = pointLat
 
 		// 读取拐点经度
 		pointLng, err := reader.ReadUint32()
 		if err != nil {
-			return 0, err
+			return 0, fmt.Errorf("read point lng: %w", err)
 		}
 		entity.RoutePoints[i].PointLng = pointLng
 
 		// 读取路段宽度
 		segmentWidth, err := reader.ReadByte()
 		if err != nil {
-			return 0, err
+			return 0, fmt.Errorf("read segment width: %w", err)
 		}
 		entity.RoutePoints[i].SegmentWidth = segmentWidth
 
 		// 读取路段属性
 		segmentAttr, err := reader.ReadByte()
 		if err != nil {
-			return 0, err
+			return 0, fmt.Errorf("read segment attribute: %w", err)
 		}
 		entity.RoutePoints[i].SegmentAttribute = RouteSegmentAttribute(segmentAttr)
 
@@ -334,13 +335,13 @@ func (entity *T808_0x8606) Decode(data []byte) (int, error) {
 		if entity.RoutePoints[i].SegmentAttribute.GetTravelTimeThreshold() {
 			travelTimeThresholdMax, err := reader.ReadUint16()
 			if err != nil {
-				return 0, err
+				return 0, fmt.Errorf("read travel time threshold max: %w", err)
 			}
 			entity.RoutePoints[i].TravelTimeThresholdMax = travelTimeThresholdMax
 
 			travelTimeThresholdMin, err := reader.ReadUint16()
 			if err != nil {
-				return 0, err
+				return 0, fmt.Errorf("read travel time threshold min: %w", err)
 			}
 			entity.RoutePoints[i].TravelTimeThresholdMin = travelTimeThresholdMin
 		}
@@ -349,13 +350,13 @@ func (entity *T808_0x8606) Decode(data []byte) (int, error) {
 		if entity.RoutePoints[i].SegmentAttribute.GetSpeedLimit() {
 			maxSpeed, err := reader.ReadUint16()
 			if err != nil {
-				return 0, err
+				return 0, fmt.Errorf("read max speed: %w", err)
 			}
 			entity.RoutePoints[i].MaxSpeed = maxSpeed
 
 			speedDuration, err := reader.ReadByte()
 			if err != nil {
-				return 0, err
+				return 0, fmt.Errorf("read speed duration: %w", err)
 			}
 			entity.RoutePoints[i].SpeedDuration = speedDuration
 		}
@@ -364,7 +365,7 @@ func (entity *T808_0x8606) Decode(data []byte) (int, error) {
 		if entity.protocolVersion == Version2019 {
 			nightMaxSpeed, err := reader.ReadUint16()
 			if err != nil {
-				return 0, err
+				return 0, fmt.Errorf("read night max speed: %w", err)
 			}
 			entity.RoutePoints[i].NightMaxSpeed = nightMaxSpeed
 		}
@@ -374,11 +375,11 @@ func (entity *T808_0x8606) Decode(data []byte) (int, error) {
 	if entity.protocolVersion == Version2019 {
 		routeNameLength, err := reader.ReadWord()
 		if err != nil {
-			return 0, err
+			return 0, fmt.Errorf("read route name length: %w", err)
 		}
 		routeName, err := reader.ReadString(int(routeNameLength))
 		if err != nil {
-			return 0, err
+			return 0, fmt.Errorf("read route name: %w", err)
 		}
 		entity.RouteName = routeName
 	}

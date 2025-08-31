@@ -1,14 +1,9 @@
 package jtt
 
 import (
+	"fmt"
 	"time"
 )
-
-// T808_0x8604_Point 多边形区域顶点
-type T808_0x8604_Point struct {
-	Lat uint32 // 顶点纬度(单位：1/10^6 度)
-	Lng uint32 // 顶点经度(单位：1/10^6 度)
-}
 
 // T808_0x8604 多边形区域项
 // 2013版本和2019版本通用（2019版本新增夜间最高速度和区域名称）
@@ -40,6 +35,12 @@ func (entity *T808_0x8604) GetProtocolVersion() VersionType {
 // MsgID 获取消息ID
 func (entity *T808_0x8604) MsgID() MsgID {
 	return MsgT808_0x8604
+}
+
+// T808_0x8604_Point 多边形区域顶点
+type T808_0x8604_Point struct {
+	Lat uint32 // 顶点纬度(单位：1/10^6 度)
+	Lng uint32 // 顶点经度(单位：1/10^6 度)
 }
 
 // Encode 编码消息
@@ -88,14 +89,14 @@ func (entity *T808_0x8604) Encode() ([]byte, error) {
 		// 名称长度
 		length, err := GB18030Length(entity.AreaName)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("get area name length: %w", err)
 		}
 		writer.WriteWord(uint16(length))
 
 		// 名称
 		err = writer.WriteString(entity.AreaName)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("write area name: %w", err)
 		}
 	}
 
@@ -109,14 +110,14 @@ func (entity *T808_0x8604) Decode(data []byte) (int, error) {
 	// 读取区域ID
 	areaID, err := reader.ReadUint32()
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("read area id: %w", err)
 	}
 	entity.AreaID = areaID
 
 	// 读取区域属性
 	areaAttr, err := reader.ReadUint16()
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("read area attribute: %w", err)
 	}
 	entity.AreaAttribute = AreaAttribute(areaAttr)
 
@@ -124,13 +125,13 @@ func (entity *T808_0x8604) Decode(data []byte) (int, error) {
 	if entity.AreaAttribute.GetTimeRange() {
 		startTime, err := reader.ReadBcdTime()
 		if err != nil {
-			return 0, err
+			return 0, fmt.Errorf("read start time: %w", err)
 		}
 		entity.StartTime = startTime
 
 		endTime, err := reader.ReadBcdTime()
 		if err != nil {
-			return 0, err
+			return 0, fmt.Errorf("read end time: %w", err)
 		}
 		entity.EndTime = endTime
 	}
@@ -139,13 +140,13 @@ func (entity *T808_0x8604) Decode(data []byte) (int, error) {
 	if entity.AreaAttribute.GetSpeedLimit() {
 		maxSpeed, err := reader.ReadUint16()
 		if err != nil {
-			return 0, err
+			return 0, fmt.Errorf("read max speed: %w", err)
 		}
 		entity.MaxSpeed = maxSpeed
 
 		speedDuration, err := reader.ReadByte()
 		if err != nil {
-			return 0, err
+			return 0, fmt.Errorf("read speed duration: %w", err)
 		}
 		entity.SpeedDuration = speedDuration
 	}
@@ -153,7 +154,7 @@ func (entity *T808_0x8604) Decode(data []byte) (int, error) {
 	// 读取顶点数
 	pointCount, err := reader.ReadUint16()
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("read point count: %w", err)
 	}
 	entity.PointCount = pointCount
 
@@ -163,14 +164,14 @@ func (entity *T808_0x8604) Decode(data []byte) (int, error) {
 		// 读取顶点纬度
 		lat, err := reader.ReadUint32()
 		if err != nil {
-			return 0, err
+			return 0, fmt.Errorf("read lat: %w", err)
 		}
 		entity.Points[i].Lat = lat
 
 		// 读取顶点经度
 		lng, err := reader.ReadUint32()
 		if err != nil {
-			return 0, err
+			return 0, fmt.Errorf("read lng: %w", err)
 		}
 		entity.Points[i].Lng = lng
 	}
@@ -181,7 +182,7 @@ func (entity *T808_0x8604) Decode(data []byte) (int, error) {
 		if entity.AreaAttribute.GetSpeedLimit() {
 			nightMaxSpeed, err := reader.ReadUint16()
 			if err != nil {
-				return 0, err
+				return 0, fmt.Errorf("read night max speed: %w", err)
 			}
 			entity.NightMaxSpeed = nightMaxSpeed
 		}
@@ -189,13 +190,13 @@ func (entity *T808_0x8604) Decode(data []byte) (int, error) {
 		// 读取名称长度
 		length, err := reader.ReadWord()
 		if err != nil {
-			return 0, err
+			return 0, fmt.Errorf("read area name length: %w", err)
 		}
 
 		// 读取名称
 		areaName, err := reader.ReadString(int(length))
 		if err != nil {
-			return 0, err
+			return 0, fmt.Errorf("read area name: %w", err)
 		}
 		entity.AreaName = areaName
 	}

@@ -1,5 +1,7 @@
 package jtt
 
+import "fmt"
+
 // T808_0x8607 删除路线
 type T808_0x8607 struct {
 	RouteCount byte     // 路线数量
@@ -40,7 +42,7 @@ func (entity *T808_0x8607) Decode(data []byte) (int, error) {
 	var err error
 	entity.RouteCount, err = reader.ReadByte()
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("read route count: %w", err)
 	}
 
 	// 读取路线ID列表
@@ -54,7 +56,7 @@ func (entity *T808_0x8607) Decode(data []byte) (int, error) {
 	for i := 0; i < int(entity.RouteCount); i++ {
 		routeID, err := reader.ReadUint32()
 		if err != nil {
-			return 0, err
+			return 0, fmt.Errorf("read route id: %w", err)
 		}
 		entity.RouteIDs[i] = routeID
 	}
