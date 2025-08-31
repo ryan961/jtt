@@ -25,10 +25,11 @@ func (entity *T808_0x8004) Decode(data []byte) (int, error) {
 		return 0, fmt.Errorf("invalid data length: %w (need >=6 bytes, got %d)", ErrInvalidBody, len(data))
 	}
 
+	r := NewReader(data)
 	var err error
-	entity.Time, err = FromBCDTime(data)
+	entity.Time, err = r.ReadBcdTime()
 	if err != nil {
 		return 0, fmt.Errorf("read Time: %w", err)
 	}
-	return 6, nil
+	return len(data) - r.Len(), nil
 }

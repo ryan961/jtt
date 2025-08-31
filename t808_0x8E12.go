@@ -10,7 +10,6 @@ func (msg *T808_0x8E12) MsgID() MsgID {
 }
 
 func (msg *T808_0x8E12) Encode() ([]byte, error) {
-	// 消息体为空
 	return []byte{}, nil
 }
 

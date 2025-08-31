@@ -28,10 +28,10 @@ func (m *T808_0x0302) Decode(data []byte) (int, error) {
 	r := NewReader(data)
 	var err error
 	if m.RespSerialNo, err = r.ReadWord(); err != nil {
-		return 0, fmt.Errorf("read RespSerialNo: %w", err)
+		return 0, fmt.Errorf("read resp serial no: %w", err)
 	}
 	if m.AnswerID, err = r.ReadByte(); err != nil {
-		return 0, fmt.Errorf("read AnswerID: %w", err)
+		return 0, fmt.Errorf("read answer id: %w", err)
 	}
 	return len(data) - r.Len(), nil
 }

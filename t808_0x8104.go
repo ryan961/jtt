@@ -9,6 +9,6 @@ func (entity *T808_0x8104) Encode() ([]byte, error) {
 	return []byte{}, nil
 }
 
-func (entity *T808_0x8104) Decode([]byte) (int, error) {
-	return 0, nil
+func (entity *T808_0x8104) Decode(data []byte) (int, error) {
+	return len(data), nil
 }

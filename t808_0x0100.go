@@ -221,30 +221,6 @@ func (entity *T808_0x0100) Decode(data []byte) (int, error) {
 		ver = Version2013
 	}
 
-	// helpers
-	trimRightZeros := func(b []byte) []byte {
-		for i := 0; i < len(b); i++ {
-			if b[i] == 0x00 {
-				return b[:i]
-			}
-		}
-		return b
-	}
-	trimRightSpaces := func(b []byte) []byte {
-		i := len(b) - 1
-		for i >= 0 && b[i] == 0x20 {
-			i--
-		}
-		return b[:i+1]
-	}
-	trimLeftZeros := func(b []byte) []byte {
-		i := 0
-		for i < len(b) && b[i] == 0x00 {
-			i++
-		}
-		return b[i:]
-	}
-
 	var b []byte
 	switch ver {
 	case Version2011:

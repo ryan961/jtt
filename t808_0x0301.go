@@ -19,6 +19,12 @@ func (m *T808_0x0301) Decode(data []byte) (int, error) {
 	if len(data) < 1 {
 		return 0, fmt.Errorf("invalid data length: %d", len(data))
 	}
-	m.EventID = data[0]
-	return 1, nil
+
+	r := NewReader(data)
+	var err error
+	m.EventID, err = r.ReadByte()
+	if err != nil {
+		return 0, fmt.Errorf("read event id: %w", err)
+	}
+	return len(data) - r.Len(), nil
 }

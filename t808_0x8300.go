@@ -141,20 +141,22 @@ func (entity *T808_0x8300) Decode(data []byte) (int, error) {
 		return 0, fmt.Errorf("invalid data length: %d", len(data))
 	}
 
-	var reader *Reader
-	entity.Flag = data[0]
-	if entity.protocolVersion == Version2019 {
-		entity.Type = data[1]
-		reader = NewReader(data[2:])
-	} else {
-		reader = NewReader(data[1:])
+	r := NewReader(data)
+	var err error
+	if entity.Flag, err = r.ReadByte(); err != nil {
+		return 0, fmt.Errorf("read flag: %w", err)
 	}
-	if reader.Len() > 0 {
-		data, err := reader.ReadString()
+	if entity.protocolVersion == Version2019 {
+		if entity.Type, err = r.ReadByte(); err != nil {
+			return 0, fmt.Errorf("read type: %w", err)
+		}
+	}
+	if r.Len() > 0 {
+		data, err := r.ReadString()
 		if err != nil {
 			return 0, err
 		}
 		entity.Text = data
 	}
-	return len(data) - reader.Len() - 1, nil
+	return len(data) - r.Len(), nil
 }

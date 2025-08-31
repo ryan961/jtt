@@ -73,29 +73,29 @@ func (m *T808_0x8302) Decode(data []byte) (int, error) {
 	if m.Flag, err = r.ReadByte(); err != nil {
 		return 0, fmt.Errorf("read Flag: %w", err)
 	}
-	var n byte
-	if n, err = r.ReadByte(); err != nil {
-		return 0, fmt.Errorf("read c: %w", err)
+	var questionLen byte
+	if questionLen, err = r.ReadByte(); err != nil {
+		return 0, fmt.Errorf("read question length: %w", err)
 	}
-	if n > 0 {
-		if m.Question, err = r.ReadString(int(n)); err != nil {
+	if questionLen > 0 {
+		if m.Question, err = r.ReadString(int(questionLen)); err != nil {
 			return 0, fmt.Errorf("read Question: %w", err)
 		}
 	}
-	m.Answers = m.Answers[:0]
+	m.Answers = make([]T808_0x8302_Answer, 0)
 	for r.Len() > 0 {
 		var id byte
 		if id, err = r.ReadByte(); err != nil {
 			return 0, fmt.Errorf("read id: %w", err)
 		}
-		var l uint16
-		if l, err = r.ReadWord(); err != nil {
-			return 0, fmt.Errorf("read length: %w", err)
+		var answerLen uint16
+		if answerLen, err = r.ReadWord(); err != nil {
+			return 0, fmt.Errorf("read answer length: %w", err)
 		}
 		ans := T808_0x8302_Answer{ID: id}
-		if l > 0 {
-			if ans.Content, err = r.ReadString(int(l)); err != nil {
-				return 0, fmt.Errorf("read Content: %w", err)
+		if answerLen > 0 {
+			if ans.Content, err = r.ReadString(int(answerLen)); err != nil {
+				return 0, fmt.Errorf("read answer content: %w", err)
 			}
 		}
 		m.Answers = append(m.Answers, ans)

@@ -55,15 +55,17 @@ func (m *T808_0x8303) Decode(data []byte) (int, error) {
 	if len(data) < 1 {
 		return 0, fmt.Errorf("invalid data length: %d", len(data))
 	}
-	m.SettingType = data[0]
-	if m.SettingType == 0 { // 无后续
-		return 1, nil
-	}
-	if len(data) < 2 {
-		return 0, fmt.Errorf("invalid data length: %d", len(data))
+
+	r := NewReader(data)
+	var err error
+	if m.SettingType, err = r.ReadByte(); err != nil {
+		return 0, fmt.Errorf("read setting type: %w", err)
 	}
 
-	r := NewReader(data[1:])
+	if m.SettingType == 0 {
+		return len(data) - r.Len(), nil
+	}
+
 	cnt, err := r.ReadByte()
 	if err != nil {
 		return 0, fmt.Errorf("read item count: %w", err)

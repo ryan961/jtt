@@ -8,9 +8,9 @@ func (entity *T808_0x0002) MsgID() MsgID {
 }
 
 func (entity *T808_0x0002) Encode() ([]byte, error) {
-	return nil, nil
+	return []byte{}, nil
 }
 
 func (entity *T808_0x0002) Decode(data []byte) (int, error) {
-	return 0, nil
+	return len(data), nil
 }

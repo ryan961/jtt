@@ -59,17 +59,16 @@ func (m *T808_0x8301) Decode(data []byte) (int, error) {
 	if len(data) < 1 {
 		return 0, fmt.Errorf("invalid data length: %d", len(data))
 	}
-	m.SettingType = data[0]
+
+	r := NewReader(data)
+	var err error
+	if m.SettingType, err = r.ReadByte(); err != nil {
+		return 0, fmt.Errorf("read setting type: %w", err)
+	}
 	if m.SettingType == 0 { // 删除所有事件，无后续
-		return 1, nil
+		return len(data) - r.Len(), nil
 	}
 
-	if len(data) < 2 {
-		return 0, fmt.Errorf("invalid data length: %d", len(data))
-	}
-
-	// 使用 Reader 解析后续字段
-	r := NewReader(data[1:])
 	packCount, err := r.ReadByte()
 	if err != nil {
 		return 0, fmt.Errorf("read pack count: %w", err)
@@ -98,6 +97,5 @@ func (m *T808_0x8301) Decode(data []byte) (int, error) {
 		m.Items = append(m.Items, item)
 	}
 
-	// 总读取长度 = 1(SettingType) + 消耗的 reader 长度
 	return len(data) - r.Len(), nil
 }
