@@ -50,6 +50,16 @@ const (
 	MsgT808_0x0702 MsgID = 0x0702
 	// MsgT808_0x0704 定位数据批量上传
 	MsgT808_0x0704 MsgID = 0x0704
+	// MsgT808_0x0705 CAN总线数据上传
+	MsgT808_0x0705 MsgID = 0x0705
+	// MsgT808_0x0800 多媒体事件信息上传
+	MsgT808_0x0800 MsgID = 0x0800
+	// MsgT808_0x0801 多媒体数据上传
+	MsgT808_0x0801 MsgID = 0x0801
+	// MsgT808_0x0802 存储多媒体数据检索应答
+	MsgT808_0x0802 MsgID = 0x0802
+	// MsgT808_0x0805 摄像头立即拍摄命令应答
+	MsgT808_0x0805 MsgID = 0x0805
 	// MsgT808_0x0500 车辆控制应答
 	MsgT808_0x0500 MsgID = 0x0500
 
@@ -95,6 +105,8 @@ const (
 	MsgT808_0x8400 MsgID = 0x8400
 	// MsgT808_0x8401 设置电话本
 	MsgT808_0x8401 MsgID = 0x8401
+	// MsgT808_0x8500 车辆控制
+	MsgT808_0x8500 MsgID = 0x8500
 	// MsgT808_0x8600 设置圆形区域
 	MsgT808_0x8600 MsgID = 0x8600
 	// MsgT808_0x8601 删除圆形区域
@@ -119,8 +131,18 @@ const (
 	MsgT808_0x8701 MsgID = 0x8701
 	// MsgT808_0x8702 上报驾驶员身份信息请求
 	MsgT808_0x8702 MsgID = 0x8702
-	// MsgT808_0x8500 车辆控制
-	MsgT808_0x8500 MsgID = 0x8500
+	// MsgT808_0x8800 多媒体数据上传应答
+	MsgT808_0x8800 MsgID = 0x8800
+	// MsgT808_0x8801 摄像头立即拍摄命令
+	MsgT808_0x8801 MsgID = 0x8801
+	// MsgT808_0x8802 存储多媒体数据检索
+	MsgT808_0x8802 MsgID = 0x8802
+	// MsgT808_0x8803 存储多媒体数据上传命令
+	MsgT808_0x8803 MsgID = 0x8803
+	// MsgT808_0x8804 录音开始命令
+	MsgT808_0x8804 MsgID = 0x8804
+	// MsgT808_0x8805 单条存储多媒体数据检索上传命令
+	MsgT808_0x8805 MsgID = 0x8805
 
 	// 0x0F00 ~ 0x0FFF 终端上行信息保留（自定义）
 
