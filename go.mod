@@ -1,11 +1,16 @@
 module github.com/ryan961/jtt
 
-go 1.24
+go 1.26
 
 require (
-	github.com/maypok86/otter/v2 v2.2.1
+	github.com/maypok86/otter/v2 v2.3.0
 	github.com/shopspring/decimal v1.4.0
-	golang.org/x/text v0.28.0
+	golang.org/x/text v0.36.0
 )
 
-require golang.org/x/sys v0.35.0 // indirect
+require (
+	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/stretchr/testify v1.11.1 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
+)
